@@ -25,7 +25,7 @@ public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint {
         String errorMessage = (String) request.getAttribute("auth_error");
 
         if (errorMessage == null) {
-            errorMessage = "Доступ запрещен. Требуется авторизация.";
+            errorMessage = "Access denied. Authorization required.";
         }
 
         Map<String, Object> body = new HashMap<>();

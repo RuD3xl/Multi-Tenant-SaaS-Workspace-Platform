@@ -27,7 +27,7 @@ public class AuthService {
     private final JwtService jwtService;
 
     @Transactional
-    public void register(RegisterRequest registerRequest){
+    public AuthResponse register(RegisterRequest registerRequest){
         if(userRepository.existsByEmail(registerRequest.getEmail())){
             throw new ResourceExistsException("Email already exists");
         }
@@ -39,6 +39,9 @@ public class AuthService {
                 .status(UserStatus.PENDING_VERIFICATION)
                 .fullName(registerRequest.getFullName()).build();
         userRepository.save(user);
+        String jwtToken = jwtService.generateToken(user);
+
+        return AuthResponse.builder().token(jwtService.generateToken(user)).build();
     }
 
     @Transactional(readOnly = true)

@@ -9,11 +9,11 @@
         <version>4.0.1</version>
         <relativePath/> </parent>
 
-    <groupId>com.RuD3xl</groupId>
-    <artifactId>SubscriptionsPlatform</artifactId>
+    <groupId>com.rud3xl</groupId>
+    <artifactId>multi-tenant-saas-workspace-platform</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>Secure Billing and Subscriptions Platform</name>
-    <description>Secure Billing and Subscriptions Platform</description>
+    <name>Multi-Tenant-SaaS-Workspace-Platform</name>
+    <description>Multi-Tenant SaaS Workspace Platform with RBAC and JWT Authentication</description>
     <url/>
     <licenses>
         <license/>

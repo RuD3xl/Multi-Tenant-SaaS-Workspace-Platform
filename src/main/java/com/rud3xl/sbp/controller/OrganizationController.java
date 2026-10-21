@@ -5,7 +5,7 @@ import com.rud3xl.sbp.dto.organization.CreateOrganizationRequest;
 import com.rud3xl.sbp.dto.organization.OrganizationResponse;
 import com.rud3xl.sbp.dto.organization.UpdateOrganizationRequest;
 import com.rud3xl.sbp.security.context.CurrentOrg;
-import com.rud3xl.sbp.service.Organizations.OrganizationService;
+import com.rud3xl.sbp.service.organizations.OrganizationService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -39,28 +39,29 @@ public class OrganizationController {
 
     @GetMapping("/{slug}")
     public ResponseEntity<OrganizationResponse> getOrganizationBySlug(
-            @AuthenticationPrincipal UserDetails userDetails,
-            @CurrentOrg Organization organization
-    ){
-        OrganizationResponse response = organizationService.getOrganizationByContext(organization, userDetails.getUsername());
+            @PathVariable("slug") String slug,
+            @AuthenticationPrincipal UserDetails userDetails
+    ) {
+        OrganizationResponse response = organizationService.getOrganizationBySlug(slug, userDetails.getUsername());
         return ResponseEntity.ok(response);
     }
 
     @PatchMapping("/{slug}")
     public ResponseEntity<OrganizationResponse> updateOrganization(
+            @PathVariable("slug") String slug,
             @RequestBody @Valid UpdateOrganizationRequest request,
-            @AuthenticationPrincipal UserDetails userDetails,
-            @CurrentOrg Organization organization
-    ){
-        return ResponseEntity.ok(organizationService.updateOrganization(organization, request, userDetails.getUsername()));
+            @AuthenticationPrincipal UserDetails userDetails
+    ) {
+        OrganizationResponse response = organizationService.updateOrganizationBySlug(slug, request, userDetails.getUsername());
+        return ResponseEntity.ok(response);
     }
 
     @DeleteMapping("/{slug}")
     public ResponseEntity<Void> deleteOrganization(
-            @AuthenticationPrincipal UserDetails userDetails,
-            @CurrentOrg Organization organization
-    ){
-        organizationService.deleteOrganization(organization, userDetails.getUsername());
+            @PathVariable("slug") String slug,
+            @AuthenticationPrincipal UserDetails userDetails
+    ) {
+        organizationService.deleteOrganizationBySlug(slug, userDetails.getUsername());
         return ResponseEntity.noContent().build();
     }
 }
