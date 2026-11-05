@@ -40,8 +40,7 @@ public class AuthService {
                 .fullName(registerRequest.getFullName()).build();
         userRepository.save(user);
         String jwtToken = jwtService.generateToken(user);
-
-        return AuthResponse.builder().token(jwtService.generateToken(user)).build();
+        return AuthResponse.builder().token(jwtToken).build();
     }
 
     @Transactional(readOnly = true)
