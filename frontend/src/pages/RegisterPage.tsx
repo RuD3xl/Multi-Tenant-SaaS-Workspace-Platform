@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { authService } from '../services/auth.service';
+import { AxiosError } from 'axios';
 
 export default function RegisterPage() {
     const [email, setEmail] = useState('');
@@ -21,7 +22,22 @@ export default function RegisterPage() {
             console.log('Successfully logged in! Token saved.');
             navigate('/dashboard');
         } catch (err) {
-            setError('Invalid email or password. Please try again.');
+            if (err instanceof AxiosError && err.response){
+                const data = err.response.data;
+                if(data.details && data.details.length > 0){
+                    const detailsText = data.details[0];
+                    if(detailsText.includes(':')){
+                        setError(detailsText.split(':')[1].trim());
+                    }
+                    else setError(detailsText);
+                }
+                else if (data.message){
+                    setError(data.message);
+                }
+            }
+            else{
+                setError('An unexpected error occurred. Please try again.');
+            }
         } finally {
             setIsLoading(false);
         }
