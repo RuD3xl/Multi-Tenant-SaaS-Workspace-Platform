@@ -122,7 +122,7 @@ class ProjectServiceTest {
 
         when(organizationRepository.findBySlug(slug)).thenReturn(Optional.of(fakeOrg));
         when(membershipRepository.findByUserEmailAndOrganizationId(email, orgId)).thenReturn(Optional.of(fakeMembership));
-        when(projectRepository.existsByNameAndOrganizationId(request.getName(), orgId)).thenReturn(false);
+        when(projectRepository.existsByNameAndOrganizationIdAndStatus(request.getName(), orgId, ProjectStatus.ACTIVE)).thenReturn(false);
         when(projectMapper.toDto(any(Project.class))).thenReturn(projectResponse);
 
 
@@ -151,7 +151,7 @@ class ProjectServiceTest {
 
         when(organizationRepository.findBySlug(slug)).thenReturn(Optional.of(fakeOrg));
         when(membershipRepository.findByUserEmailAndOrganizationId(email, orgId)).thenReturn(Optional.of(fakeMembership));
-        when(projectRepository.existsByNameAndOrganizationId("Duplicate name", orgId)).thenReturn(true);
+        when(projectRepository.existsByNameAndOrganizationIdAndStatus("Duplicate name", orgId, ProjectStatus.ACTIVE)).thenReturn(true);
 
         assertThrows(ResourceExistsException.class, () -> {projectService.createProject(slug, request, email);});
 

@@ -39,11 +39,12 @@ public class ProjectService {
         Organization organization = findActiveOrgBySlug(slug);
         Membership membership = getRequesterMembership(userEmail, organization);
         isAllowedToInteractWithProject(membership);
-        if (projectRepository.existsByNameAndOrganizationId(request.getName(), organization.getId())) {
+        if (projectRepository.existsByNameAndOrganizationIdAndStatus(request.getName(), organization.getId(), ProjectStatus.ACTIVE)) {
             throw new ResourceExistsException("Project with name " + request.getName() + " already exists in this organization.");
         }
         Project project = Project.builder()
                 .name(request.getName())
+                .description(request.getDescription())
                 .organization(organization)
                 .status(ProjectStatus.ACTIVE)
                 .build();
@@ -106,11 +107,14 @@ public class ProjectService {
         Project project = projectRepository.findByIdAndOrganizationId(projectId, organization.getId())
                 .orElseThrow(() -> new ResourceNotFoundException("Project not found"));
 
-        if(project.getStatus() == ProjectStatus.ACTIVE){
-            project.setStatus(ProjectStatus.ARCHIVED);
+        if(project.getStatus() == ProjectStatus.ARCHIVED){
+            return;
         }
-        projectRepository.save(project);
 
+        project.setStatus(ProjectStatus.ARCHIVED);
+        String uniqueSuffix = "_archived_" + UUID.randomUUID().toString().substring(0, 8);
+        project.setName(project.getName() + uniqueSuffix);
+        projectRepository.save(project);
     }
 
     private Organization findActiveOrgBySlug(String slug) {

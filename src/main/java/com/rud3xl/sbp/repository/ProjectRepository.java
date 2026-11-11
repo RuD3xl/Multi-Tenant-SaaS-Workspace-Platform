@@ -16,5 +16,5 @@ public interface ProjectRepository extends JpaRepository<Project, UUID> {
     Optional<Project> findByIdAndOrganizationId(UUID id, UUID organizationId);
     Page<Project> findAllByOrganizationId(UUID organizationId, Pageable pageable);
     Page<Project> findAllByOrganizationIdAndStatus(UUID organizationId, ProjectStatus status, Pageable pageable);
-    boolean existsByNameAndOrganizationId(String name, UUID organizationId);
+    boolean existsByNameAndOrganizationIdAndStatus(String name, UUID orgId, ProjectStatus status);
 }
