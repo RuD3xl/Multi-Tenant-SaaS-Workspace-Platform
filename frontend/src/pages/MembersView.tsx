@@ -1,7 +1,7 @@
 import { useParams } from 'react-router-dom';
 import { useEffect, useState } from "react";
 import type { MemberResponse } from "../types/workspace.types.ts";
-import { workspaceService } from "../services/workspace.service.ts";
+import {memberService} from "../services/member.service.ts";
 
 export default function MembersView() {
     const { slug } = useParams<{ slug: string }>();
@@ -14,7 +14,7 @@ export default function MembersView() {
         const fetchMembers = async () => {
             setIsMemberLoading(true);
             try {
-                const memberData = await workspaceService.getMembers(slug);
+                const memberData = await memberService.getMembers(slug);
                 setMembers(memberData);
             } catch (error) {
                 setMembers([]);
