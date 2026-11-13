@@ -2,13 +2,14 @@ import { useEffect, useState } from 'react';
 import {Link, Outlet, useNavigate} from 'react-router-dom';
 import { userService } from '../services/user.service.ts';
 import type { UserResponse } from '../types/user.types.ts';
+import CreateOrgModal from '../components/CreateOrgModal.tsx';
 
 import {organizationService} from "../services/organization.service.ts";
 import type { OrganizationResponse } from '../types/organization.types.ts';
 
 export default function DashboardLayout() {
     const [isLoading, setIsLoading] = useState(true);
-
+    const [isCreateOrgModalOpen, setIsCreateOrgModalOpen] = useState(false);
     const navigate = useNavigate();
     const [user, setUser] = useState<UserResponse | null>(null);
     const [organizations, setOrganizations] = useState<OrganizationResponse[]>([]);
@@ -111,7 +112,9 @@ export default function DashboardLayout() {
                         <p className="text-slate-500 mb-6 text-center max-w-md">
                             You don't belong to any workspaces yet. Create your first organization to start managing projects and teams.
                         </p>
-                        <button className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-6 rounded-lg transition-colors">
+                        <button
+                            onClick={() => setIsCreateOrgModalOpen(true)}
+                            className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-6 rounded-lg transition-colors">
                             Create Organization
                         </button>
                     </div>
@@ -150,6 +153,17 @@ export default function DashboardLayout() {
                     </>
                 )}
             </main>
+            {isCreateOrgModalOpen && (
+                <CreateOrgModal
+                    onClose={() => setIsCreateOrgModalOpen(false)}
+                    onSuccess={(newOrg) => {
+                        setOrganizations([...organizations, newOrg]);
+                        setActiveSlug(newOrg.slug);
+                        setIsCreateOrgModalOpen(false);
+                        navigate(`/dashboard/${newOrg.slug}/projects`);
+                    }}
+                />
+            )}
         </div>
     );
 
