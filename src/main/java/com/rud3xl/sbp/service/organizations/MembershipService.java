@@ -77,7 +77,7 @@ public class MembershipService {
                 .user(newMemberUser)
                 .organization(organization)
                 .role(OrganizationRole.MEMBER)
-                .status(MembershipStatus.ACTIVE)
+                .status(MembershipStatus.INVITED)
                 .build();
 
         membershipRepository.save(newMembership);
