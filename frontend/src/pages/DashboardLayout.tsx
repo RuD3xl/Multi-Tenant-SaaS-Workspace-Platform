@@ -6,6 +6,9 @@ import CreateOrgModal from '../components/CreateOrgModal.tsx';
 
 import {organizationService} from "../services/organization.service.ts";
 import type { OrganizationResponse } from '../types/organization.types.ts';
+import {memberService} from "../services/member.service.ts";
+import type {WorkspaceInviteResponse} from "../types/workspace.types.ts";
+import InvitesList from "../components/InvitesList.tsx";
 
 export default function DashboardLayout() {
     const [isLoading, setIsLoading] = useState(true);
@@ -14,6 +17,8 @@ export default function DashboardLayout() {
     const [user, setUser] = useState<UserResponse | null>(null);
     const [organizations, setOrganizations] = useState<OrganizationResponse[]>([]);
     const [activeSlug, setActiveSlug] = useState<string>('');
+    const [invites, setInvites] = useState<WorkspaceInviteResponse[]>([]);
+
     const BuildingIcon = (props: React.SVGProps<SVGSVGElement>) => (
         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 16 16" {...props}>
             <g fill="currentColor"><path d="M4 2.5a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5zm3 0a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5zm3.5-.5a.5.5 0 0 0-.5.5v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5zM4 5.5a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5zM7.5 5a.5.5 0 0 0-.5.5v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5zm2.5.5a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5zM4.5 8a.5.5 0 0 0-.5.5v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5zm2.5.5a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5zm3.5-.5a.5.5 0 0 0-.5.5v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5z"/><path d="M2 1a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1zm11 0H3v14h3v-2.5a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 .5.5V15h3z"/></g>
@@ -22,11 +27,14 @@ export default function DashboardLayout() {
     useEffect(() => {
         const fetchProfile = async () => {
             try {
-                const [userData, orgData] = await Promise.all([
-                    userService.getProfile(), organizationService.getMyOrganizations()
+                const [userData, orgData, invitesData] = await Promise.all([
+                    userService.getProfile(),
+                    organizationService.getMyOrganizations(),
+                    memberService.getMyInvites()
                 ]);
                 setUser(userData);
                 setOrganizations(orgData);
+                setInvites(invitesData);
                 if(orgData.length > 0){
                     setActiveSlug(orgData[0].slug);
 
@@ -55,6 +63,23 @@ export default function DashboardLayout() {
         setActiveSlug(newSlug);
         navigate(`/dashboard/${newSlug}/projects`);
     }
+
+    const refreshDashboardData = async () => {
+        try {
+            const [orgData, invitesData] = await Promise.all([
+                organizationService.getMyOrganizations(),
+                memberService.getMyInvites()
+            ]);
+            setOrganizations(orgData);
+            setInvites(invitesData);
+            if (orgData.length > 0 && !activeSlug) {
+                setActiveSlug(orgData[0].slug);
+                navigate(`/dashboard/${orgData[0].slug}/projects`);
+            }
+        } catch (error) {
+            console.error('Failed to refresh data', error);
+        }
+    };
 
     return (
         <div className="min-h-screen bg-slate-50">
@@ -101,6 +126,7 @@ export default function DashboardLayout() {
             </header>
 
             <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                {!isLoading && <InvitesList invites={invites} onInviteResolved={refreshDashboardData} />}
                 {isLoading ? (
                     <div className="text-slate-500">Loading workspace...</div>
                 ) : organizations.length === 0 ? (

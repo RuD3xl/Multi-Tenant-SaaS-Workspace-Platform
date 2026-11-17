@@ -23,3 +23,9 @@ export interface MemberResponse {
     status: string;
     joinedAt: string;
 }
+
+export interface WorkspaceInviteResponse {
+    orgName: string;
+    orgSlug: string;
+    role: string;
+}
