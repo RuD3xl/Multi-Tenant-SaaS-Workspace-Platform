@@ -60,4 +60,16 @@ public class MembershipController {
         membershipService.removeMember(slug, userDetails.getUsername(), userId);
         return ResponseEntity.noContent().build();
     }
+
+    @PostMapping("/accept")
+    public ResponseEntity<Void> acceptInvite(@PathVariable("slug") String slug, @AuthenticationPrincipal UserDetails userDetails){
+        membershipService.acceptInvitation(userDetails.getUsername(), slug);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/reject")
+    public ResponseEntity<Void> rejectInvite(@PathVariable("slug") String slug, @AuthenticationPrincipal UserDetails userDetails){
+        membershipService.rejectInvitation(userDetails.getUsername(), slug);
+        return ResponseEntity.noContent().build();
+    }
 }

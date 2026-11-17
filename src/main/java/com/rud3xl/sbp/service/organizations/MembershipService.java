@@ -7,6 +7,7 @@ import com.rud3xl.sbp.domain.enums.MembershipStatus;
 import com.rud3xl.sbp.domain.enums.OrganizationRole;
 import com.rud3xl.sbp.domain.enums.OrganizationStatus;
 import com.rud3xl.sbp.dto.organization.MemberResponse;
+import com.rud3xl.sbp.dto.organization.WorkspaceInviteResponse;
 import com.rud3xl.sbp.exception.ResourceExistsException;
 import com.rud3xl.sbp.exception.ResourceNotFoundException;
 import com.rud3xl.sbp.mapper.MembershipMapper;
@@ -141,6 +142,39 @@ public class MembershipService {
 
         target.setStatus(MembershipStatus.REMOVED);
         membershipRepository.save(target);
+    }
+
+    @Transactional(readOnly = true)
+    public List<WorkspaceInviteResponse> getMyInvitations(String email) {
+        List<Membership> inviteMemberships = membershipRepository.findAllByUserEmailAndStatus(email, MembershipStatus.INVITED);
+        return inviteMemberships.stream()
+                .map(membership -> WorkspaceInviteResponse.builder()
+                        .orgName(membership.getOrganization().getName())
+                        .orgSlug(membership.getOrganization().getSlug())
+                        .role(membership.getRole())
+                        .build()
+                )
+                .toList();
+    }
+
+    @Transactional
+    public void acceptInvitation(String email, String slug) {
+        Organization org = findActiveOrganizationBySlug(slug);
+        Membership membership = membershipRepository.findByUserEmailAndOrganizationId(email, org.getId())
+                .filter(m -> m.getStatus() == MembershipStatus.INVITED)
+                .orElseThrow(() -> new ResourceNotFoundException("No invitation found for this organization"));
+        membership.setStatus(MembershipStatus.ACTIVE);
+        membershipRepository.save(membership);
+    }
+
+    @Transactional
+    public void rejectInvitation(String email, String slug) {
+        Organization org = findActiveOrganizationBySlug(slug);
+        Membership membership = membershipRepository.findByUserEmailAndOrganizationId(email, org.getId())
+                .filter(m -> m.getStatus() == MembershipStatus.INVITED)
+                .orElseThrow(() -> new ResourceNotFoundException("No invitation found for this organization"));
+        membership.setStatus(MembershipStatus.REJECTED);
+        membershipRepository.save(membership);
     }
 
     private Organization findActiveOrganizationBySlug(String slug) {
