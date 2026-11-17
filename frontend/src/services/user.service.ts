@@ -3,7 +3,7 @@ import type {UserResponse} from '../types/user.types.ts';
 
 export const userService = {
     getProfile: async (): Promise<UserResponse> => {
-        const response = await api.get<UserResponse>('/me');
+        const response = await api.get<UserResponse>('users/me');
         return response.data;
     }
 };
